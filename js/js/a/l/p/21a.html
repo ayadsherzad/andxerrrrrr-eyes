@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+<html lang="ar" >
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" media="screen" href="https://fontlibrary.org/face/droid-arabic-kufi" type="text/css"/>
+  <link rel="stylesheet"  href="load.css" type="text/css"/>
+  <style>
+  /* Your original CSS exactly */
+  *{
+    font-family: 'Droid Arabic Kufi', 'Segoe UI';
+    padding:0;
+    margin:0;
+    color:#fff;
+  }
+  body {background:#111;}
+  .form { 
+    padding-top:40px;
+    width:95%;
+    height:430px;
+    background:#222;
+    display:flex;
+    margin-top:100px;
+    border:#fff solid 2px;
+    border-radius : 20px;
+  }
+  input {
+    text-align:center;
+    direction: rtl;
+    outline:none;
+    color:#fff;
+    height:50px;
+    width:90%;
+    border:#999 solid 1px;
+    background:#222;
+    border-radius:10px;
+    margin:10px;
+    font-weight:900;
+  }
+  .btt {
+    direction: rtl;
+    outline:none;
+    color:#fff;
+    height:50px;
+    width:90%;
+    border:none;
+    background:#1e51eb;
+    border-radius:25px;
+    margin:10px;
+    font-weight:900;
+  }
+  .thename {
+    background-color:#102945;
+    width:200px;
+    min-height: 200px;
+    float:right;
+    border-radius:25px;
+    padding-top:20px;
+    margin:2px;
+  }
+  .thep {
+    text-align:right;
+    color:#fff;
+    margin-right:10px;
+  }
+  .btn{
+    width:180px;
+    height:40px;
+    background-color:#1e51eb;
+    border-radius:20px;
+    border:none;
+    color:white;
+    margin-top:10px;
+    font-weight:900;
+  }
+  select {
+    width:85%;
+    background-color:#1e58eb;
+    outline:none;
+    border:none;
+    border-radius:7.5px;
+    text-align:center;
+  }
+  .title {
+    width:100%;
+    height:60px;
+    position: fixed;
+    top: 0;
+    background-color:#1e58eb;
+    display:block;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:Copperplate;
+    font-weight:900;
+    text-align:center;
+    padding-top:10px;
+    width:100%;
+  }
+  #fam-search-results{
+    margin-bottom:100px;
+    height:600px;
+  }
+.theload {
+visibility:hidden;
+background-color:#333;
+width:130px;
+height: 130px;
+border-radius:25px;
+padding-top:20px;
+overflow: hidden;
+position: fixed;
+bottom:33%;
+left:33%;
+top:33%;
+right:33%;
+
+}
+
+div .load {
+    margin-top:80px;
+    opacity:1.0;
+}
+
+select {
+  text-align: center;
+  direction: rtl;
+  outline: none;
+  color: #fff;
+  height: 40px;
+  width: 23%;
+  border: #999 solid 1px;
+  background: #222;
+  border-radius: 10px;
+  margin: 10px;
+  font-weight: 900;
+  font-size: 16px;
+  -webkit-appearance: none; /* Remove default arrow in Chrome/Safari */
+  -moz-appearance: none;    /* Remove default arrow in Firefox */
+  appearance: none;         /* Remove default arrow in modern browsers */
+  padding: 0 10px;
+}
+
+option {
+  background: #222;   /* Dark background */
+  color: #fff;        /* White text */
+  font-weight: 900;   /* Bold text */
+  text-align: center; /* Centered text */
+  direction: rtl;     /* Right-to-left text direction */
+  padding: 10px;      /* Space inside */
+  border: none;       /* Remove default border */
+}
+
+  
+  </style>
+
+  <title>ANDXERR</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+</head>
+<body>
+
+<div class="title"><h1>ANDXERR</h1></div>
+
+<center>
+  <div class="form">
+    <form id="myForm">
+      <input placeholder="ناوی کەس" name="name" size="30" type="text" id="name" required>
+      <input placeholder="ناوی باوک" name="fname" size="30" type="text" id="fname" required/>
+      <input placeholder="ناوی باپیر" name="gname" size="30" type="text" id="gname" />
+      <input placeholder=" بەرواری لەدایکبون" name="birth" size="30" type="text" id="birth" required/>
+      <select id="inputType" name="inputType">
+
+        <option value="balad">بلد</option>
+        <option value="muthana">موثەنە</option>
+
+
+
+
+
+
+
+      </select>
+      <button class="btt" type="submit" id="submitBtn">گەڕان 🔎</button>
+
+    </form>
+  </div>
+
+
+<div class="theload" id="loading" >
+<div class="lds-roller"><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+<p class="load">🔎گەران</p>
+</div> 
+</div>
+
+
+
+
+
+  <div id="response"></div>
+  <div id="fam-search-results"></div>
+</center>
+
+<script>
+  window.onload = async () => {
+    const loadingDiv = document.getElementById('loading');
+    loadingDiv.style.visibility = 'show';
+
+    // Initialize SQL.js
+    const SQL = await initSqlJs({
+      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+    });
+
+    const form = document.getElementById('myForm');
+    const responseDiv = document.getElementById('response');
+    const famSearchResults = document.getElementById('fam-search-results');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      responseDiv.innerHTML = '';
+      famSearchResults.innerHTML = '';
+
+      const name = document.getElementById('name').value.trim();
+      const fname = document.getElementById('fname').value.trim();
+      const gname = document.getElementById('gname').value.trim();
+      const birth = document.getElementById('birth').value.trim() + '00';
+      const inputType = document.getElementById('inputType').value;
+
+      if(!name || !birth){
+        alert('Please fill the required fields.');
+        return;
+      }
+
+      loadingDiv.style.visibility = 'visible';
+
+      try {
+        // Fetch sqlite file binary
+        const url = `iqd/${inputType}.sqlite`;
+        const response = await fetch(url);
+        if(!response.ok) throw new Error('Failed to load DB file.');
+
+        const buffer = await response.arrayBuffer();
+
+        // Load DB from buffer
+        const db = new SQL.Database(new Uint8Array(buffer));
+
+        // Prepare SQL query with parameters (LIKE for names, exact birth)
+        const stmt = db.prepare(
+          `SELECT * FROM person 
+           WHERE p_first LIKE $name COLLATE NOCASE 
+             AND p_father LIKE $fname COLLATE NOCASE 
+             AND p_grand LIKE $gname COLLATE NOCASE 
+             AND p_birth = $birth`
+        );
+
+        stmt.bind({
+          $name: `%${name}%`,
+          $fname: `%${fname}%`,
+          $gname: `%${gname}%`,
+          $birth: birth
+        });
+
+        let resultsHTML = '';
+        while(stmt.step()) {
+          const row = stmt.getAsObject();
+          const b = String(row.p_birth).slice(0, -2);
+          const bn = 2025 - parseInt(b);
+
+          resultsHTML += `
+            <div class='thename'>
+              <p class='thep'>ناو : ${row.p_first} ${row.p_father} ${row.p_grand}</p>
+              <p class='thep'>سالی لە دایک بوون : ${b}</p>
+              <p class='thep'>تەمەن : ${bn}</p>
+              <p class='thep'>ژمارەی خیزان : ${row.fam_no}</p>
+              <center><button class='btn' data-famno='${row.fam_no}'>زانیاری تەواوی خیزان</button></center>
+            </div>
+          `;
+        }
+        stmt.free();
+
+        if(resultsHTML === '') resultsHTML = 'هیچ ناویک نیە بەم ناوە';
+
+        responseDiv.innerHTML = resultsHTML;
+
+        // Add event listener to family buttons
+        const btns = document.querySelectorAll('.btn');
+        btns.forEach(btn => {
+          btn.onclick = async () => {
+            const famNo = btn.getAttribute('data-famno');
+            famSearchResults.innerHTML = '';
+            loadingDiv.style.visibility = 'visible';
+
+            // Query family members by fam_no
+            const stmtFam = db.prepare("SELECT * FROM person WHERE fam_no = $famNo");
+            stmtFam.bind({$famNo: famNo});
+            let famHTML = '';
+            while(stmtFam.step()) {
+              const row = stmtFam.getAsObject();
+              const b = String(row.p_birth).slice(0, -2);
+              const bn = 2025 - parseInt(b);
+              famHTML += `
+                <div class='thename'>
+                  <p class='thep'>ناو : ${row.p_first} ${row.p_father} ${row.p_grand}</p>
+                  <p class='thep'>بەرواری لەدایکبوون : ${b}</p>
+                  <p class='thep'>تەمەن : ${bn}</p>
+                </div>
+              `;
+            }
+            stmtFam.free();
+            famSearchResults.innerHTML = famHTML || 'هیچ ناویک بەم ناوە نیە';
+
+            loadingDiv.style.visibility = 'hidden';
+          };
+        });
+
+      } catch (error) {
+        responseDiv.innerHTML = 'Error: ' + error.message;
+      } finally {
+        loadingDiv.style.visibility = 'hidden';
+      }
+    });
+  };
+</script>
+
+</body>
+</html>
